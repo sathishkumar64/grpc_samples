@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package model;
+
+message School{
+
+     string schoolId=1;
+	 string schoolname=2;
+	 string eduMode=3;
+	 Address address=4;
+	 float rating=5;
+}
+
+
+message Address{
+    string address=1;
+    string state=2;
+    string city=3;
+}
+
+message CreateSchoolReq{
+    School school =1;
+}
+
+message CreateSchoolRes{
+    School school =1;
+}
+
+
+message Void{}
+
+message ListSchoolRes{
+   repeated School school =1;
+}
+
+
+service SchoolService{     
+    rpc ListSchool(Void) returns (ListSchoolRes);
+}
