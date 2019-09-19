@@ -12,18 +12,18 @@ import (
 
 //School type is expose services.
 type School struct {
-	schoolID   string
-	schoolName string
-	eduMode    string
-	address    Address
-	rating     float32
+	schoolID   string  `bson:"school_i_d"`
+	schoolName string  `bson:"school_name"`
+	eduMode    string  `bson:"edu_mode"`
+	address    Address `bson:"address"`
+	rating     float32 `bson:"rating"`
 }
 
 //Address type is expose services.
 type Address struct {
-	address string
-	state   string
-	city    string
+	address string `bson:"address"`
+	state   string `bson:"state"`
+	city    string `bson:"city"`
 }
 
 // SchoolServiceServer as service to expose
