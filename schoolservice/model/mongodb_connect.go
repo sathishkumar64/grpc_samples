@@ -3,19 +3,19 @@ package model
 import (
 	"context"
 	"fmt"
-	"time"
-	"log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"time"
 )
 
 var db *mongo.Client
-var studentdb *mongo.Collection
+var Studentdb *mongo.Collection
 var mongoCtx context.Context
 
-func db_connect(){
+func db_connect() {
 
-	fmt.Println("Connecting to MongoDB...")	
+	fmt.Println("Connecting to MongoDB...")
 	mongoCtx, _ = context.WithTimeout(context.Background(), 2*time.Second)
 
 	db, err := mongo.Connect(mongoCtx, options.Client().ApplyURI("mongodb+srv://admin:admin@cluster0-hsyh0.gcp.mongodb.net"))
@@ -29,5 +29,5 @@ func db_connect(){
 		fmt.Println("Connected to Mongodb")
 	}
 
-	studentdb = db.Database("schoolservice").Collection("school")
+	Studentdb = db.Database("schoolservice").Collection("school")
 }

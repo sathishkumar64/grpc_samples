@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"github.com/sathishkumar64/grpc_samples/schoolservice/model"
 	"google.golang.org/grpc"
-
+	"log"
+	"os"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 }
 
 func list(ctx context.Context, client model.SchoolServiceClient) error {
-	list, err := client.List(ctx, &client.Void{})
+	list, err := client.ListSchool(ctx, &model.Void{})
 
 	log.Println(err)
 
@@ -33,13 +32,7 @@ func list(ctx context.Context, client model.SchoolServiceClient) error {
 	}
 
 	for _, t := range list.School {
-
-		if t.Done {
-			fmt.Printf("Done")
-		} else {
-			fmt.Printf("No something went bad")
-		}
-		fmt.Printf("%s\n", t.Text)
+		fmt.Printf("%s\n", t)
 	}
 	return nil
 }
