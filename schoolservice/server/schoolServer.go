@@ -3,9 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 
 	"github.com/sathishkumar64/grpc_samples/schoolservice/model"
 )
@@ -32,10 +37,33 @@ type SchoolServiceServer struct {
 
 // ListSchool to list out all schools
 func (s SchoolServiceServer) ListSchool(ctx context.Context, void *model.Void) (*model.ListSchoolRes, error) {
-	var list []model.ListSchoolRes
-	_, err := model.Studentdb.Find(ctx, nil)
-	for _, response := range list {
-		log.Printf("all docs %v\n", response)
+
+	school := &School{}
+	cursor, err := model.Studentdb.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Unknown internal error: %v", err))
+	}
+
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		// Decode the data at the current pointer and write it to data
+		err := cursor.Decode(school)
+		// check error
+		if err != nil {
+			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
+		}
+		log.Println(school)
+
+	/*	// If no error is found send blog over stream
+		stream.Send(&blogpb.ListBlogsRes{
+			Blog: &blogpb.Blog{
+				Id:       data.ID.Hex(),
+				AuthorId: data.AuthorID,
+				Content:  data.Content,
+				Title:    data.Title,
+			},
+		})*/
 	}
 	return nil, err
 }
@@ -49,5 +77,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not listen to :8888 :%v", err)
 	}
-	log.Fatal(srv.Serve(lis))
+	model.DbConnect()
+	go func() {
+		if err := srv.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
+	}()
+	c := make(chan os.Signal)
+	// Relay os.Interrupt to our channel (os.Interrupt = CTRL+C)
+	// Ignore other incoming signals
+	signal.Notify(c, os.Interrupt)
+	// Block main routine until a signal is received
+	// As long as user doesn't press CTRL+C a message is not passed and our main routine keeps running
+	<-c
+	// After receiving CTRL+C Properly stop the server
+	fmt.Println("\nStopping the server...")
+	srv.Stop()
+	lis.Close()
+	fmt.Println("Closing MongoDB connection")
+	model.DB.Disconnect(model.MongoCtx)
+	fmt.Println("Done.")
+
+
 }

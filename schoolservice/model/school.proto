@@ -5,7 +5,7 @@ package model;
 message School{
 
      string schoolId=1;
-	 string schoolname=2;
+	 string schoolName = 2;
 	 string eduMode=3;
 	 Address address=4;
 	 float rating=5;
@@ -35,5 +35,5 @@ message ListSchoolRes{
 
 
 service SchoolService{     
-    rpc ListSchool(Void) returns (ListSchoolRes);
+    rpc ListSchool(Void) returns (stream  ListSchoolRes);
 }

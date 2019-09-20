@@ -23,16 +23,16 @@ func main() {
 }
 
 func list(ctx context.Context, client model.SchoolServiceClient) error {
-	list, err := client.ListSchool(ctx, &model.Void{})
+	_, err := client.ListSchool(ctx, &model.Void{})
 
-	log.Println(err)
+	log.Println("We had error::::::",err)
 
 	if err != nil {
 		return fmt.Errorf("Could not fetch task: %v", err)
 	}
 
-	for _, t := range list.School {
+	/*for _, t := range list.School {
 		fmt.Printf("%s\n", t)
-	}
+	}*/
 	return nil
 }
