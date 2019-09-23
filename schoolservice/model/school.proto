@@ -30,7 +30,7 @@ message CreateSchoolRes{
 message Void{}
 
 message ListSchoolRes{
-   repeated School school =1;
+    School school =1;
 }
 
 

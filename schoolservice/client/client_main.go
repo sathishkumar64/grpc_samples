@@ -25,7 +25,7 @@ func main() {
 func list(ctx context.Context, client model.SchoolServiceClient) error {
 	_, err := client.ListSchool(ctx, &model.Void{})
 
-	log.Println("We had error::::::",err)
+	log.Println("We had error::::::", err)
 
 	if err != nil {
 		return fmt.Errorf("Could not fetch task: %v", err)

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	DB        *mongo.Client
+	DB *mongo.Client
 	//Studentdb
 	Studentdb *mongo.Collection
 	MongoCtx  context.Context

@@ -12,11 +12,11 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/sathishkumar64/grpc_samples/schoolservice/model"
+	. "github.com/sathishkumar64/grpc_samples/schoolservice/model"
 )
 
 //School type is expose services.
-type School struct {
+type SchoolItem struct {
 	schoolID   string  `bson:"school_i_d"`
 	schoolName string  `bson:"school_name"`
 	eduMode    string  `bson:"edu_mode"`
@@ -36,10 +36,10 @@ type SchoolServiceServer struct {
 }
 
 // ListSchool to list out all schools
-func (s SchoolServiceServer) ListSchool(ctx context.Context, void *model.Void) (*model.ListSchoolRes, error) {
+func (s SchoolServiceServer) ListSchool(ctx context.Context, void *Void) (*ListSchoolRes, error) {
 
-	school := &School{}
-	cursor, err := model.Studentdb.Find(ctx, bson.M{})
+	data := &SchoolItem{}
+	cursor, err := Studentdb.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Unknown internal error: %v", err))
 	}
@@ -48,22 +48,18 @@ func (s SchoolServiceServer) ListSchool(ctx context.Context, void *model.Void) (
 
 	for cursor.Next(context.Background()) {
 		// Decode the data at the current pointer and write it to data
-		err := cursor.Decode(school)
+		err := cursor.Decode(data)
 		// check error
 		if err != nil {
 			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
 		}
-		log.Println(school)
+		//log.Println(data)
 
-	/*	// If no error is found send blog over stream
-		stream.Send(&blogpb.ListBlogsRes{
-			Blog: &blogpb.Blog{
-				Id:       data.ID.Hex(),
-				AuthorId: data.AuthorID,
-				Content:  data.Content,
-				Title:    data.Title,
-			},
-		})*/
+		// If no error is found send blog over stream
+		response := &ListSchoolRes{
+			School: []*School{},
+		}
+		log.Println("The respones is", response.School)
 	}
 	return nil, err
 }
@@ -72,12 +68,12 @@ func main() {
 	fmt.Println("Hey I'm initializing grpc server.")
 	srv := grpc.NewServer()
 	var schoolService SchoolServiceServer
-	model.RegisterSchoolServiceServer(srv, schoolService)
+	RegisterSchoolServiceServer(srv, schoolService)
 	lis, err := net.Listen("tcp", ":8888")
 	if err != nil {
 		log.Fatalf("Could not listen to :8888 :%v", err)
 	}
-	model.DbConnect()
+	DbConnect()
 	go func() {
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("Failed to serve: %v", err)
@@ -95,8 +91,7 @@ func main() {
 	srv.Stop()
 	lis.Close()
 	fmt.Println("Closing MongoDB connection")
-	model.DB.Disconnect(model.MongoCtx)
+	DB.Disconnect(MongoCtx)
 	fmt.Println("Done.")
-
 
 }
