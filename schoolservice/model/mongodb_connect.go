@@ -3,9 +3,10 @@ package model
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
 var (
@@ -15,13 +16,13 @@ var (
 	MongoCtx  context.Context
 )
 
-//DB_connect
+//DBConnect
 func DbConnect() {
 	fmt.Println("Connecting to MongoDB...")
 	//MongoCtx, _ = context.WithTimeout(context.Background(), 2*time.Second)
 	MongoCtx = context.Background()
-	//DB, err := mongo.Connect(MongoCtx, options.Client().ApplyURI("mongodb+srv://admin:admin@cluster0-hsyh0.gcp.mongodb.net"))
-	DB, err := mongo.Connect(MongoCtx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	DB, err := mongo.Connect(MongoCtx, options.Client().ApplyURI("mongodb+srv://admin:admin@cluster0-hsyh0.gcp.mongodb.net"))
+	//DB, err := mongo.Connect(MongoCtx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
