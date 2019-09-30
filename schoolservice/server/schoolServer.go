@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/sathishkumar64/grpc_samples/schoolservice/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -11,35 +12,40 @@ import (
 	"net"
 	"os"
 	"os/signal"
-
-	. "github.com/sathishkumar64/grpc_samples/schoolservice/model"
 )
 
-//School type is expose services.
+//SchoolItem
 type SchoolItem struct {
-	schoolID   string  `bson:"school_i_d"`
-	schoolName string  `bson:"school_name"`
-	eduMode    string  `bson:"edu_mode"`
-	address    Address `bson:"address"`
-	rating     float32 `bson:"rating"`
+	SchoolId   string  `json:"school_id"`
+	SchoolName string  `json:"school_name"`
+	EduMode    string  `json:"edu_mode"`
+	Address    Address `json:"address"`
+	//rating     float32
 }
 
 //Address type is expose services.
 type Address struct {
-	address string `bson:"address"`
-	state   string `bson:"state"`
-	city    string `bson:"city"`
+	Address string `json:"address"`
+	State   string `json:"state"`
+	City    string `json:"city"`
 }
 
 // SchoolServiceServer as service to expose
 type SchoolServiceServer struct {
 }
 
-// ListSchool to list out all schools
-func (s SchoolServiceServer) ListSchool(ctx context.Context, void *Void) (*ListSchoolRes, error) {
 
-	data := &SchoolItem{}
-	cursor, err := Studentdb.Find(ctx, bson.M{})
+func init(){
+	model.DbConnect()
+}
+
+
+
+// ListSchool to list out all schools
+func (s SchoolServiceServer) ListSchool(ctx context.Context, void *model.Void) (*model.ListSchoolRes, error) {
+
+	data := SchoolItem{}
+	cursor, err := model.Studentdb.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Unknown internal error: %v", err))
 	}
@@ -53,13 +59,15 @@ func (s SchoolServiceServer) ListSchool(ctx context.Context, void *Void) (*ListS
 		if err != nil {
 			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
 		}
-		//log.Println(data)
+		log.Println(data)
 
-		// If no error is found send blog over stream
-		response := &ListSchoolRes{
-			School: []*School{},
-		}
-		log.Println("The respones is", response.School)
+		var res *model.ListSchoolRes = &model.ListSchoolRes{
+			School: []*model.School{
+				 data.SchoolId,
+				 data.SchoolName ,
+			 	data.EduMode ,
+		}}
+		log.Println("The respones is", res)
 	}
 	return nil, err
 }
@@ -68,12 +76,12 @@ func main() {
 	fmt.Println("Hey I'm initializing grpc server.")
 	srv := grpc.NewServer()
 	var schoolService SchoolServiceServer
-	RegisterSchoolServiceServer(srv, schoolService)
+	model.RegisterSchoolServiceServer(srv, schoolService)
 	lis, err := net.Listen("tcp", ":8888")
 	if err != nil {
 		log.Fatalf("Could not listen to :8888 :%v", err)
 	}
-	DbConnect()
+
 	go func() {
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("Failed to serve: %v", err)
@@ -91,7 +99,7 @@ func main() {
 	srv.Stop()
 	lis.Close()
 	fmt.Println("Closing MongoDB connection")
-	DB.Disconnect(MongoCtx)
+	model.DB.Disconnect(model.MongoCtx)
 	fmt.Println("Done.")
 
 }
